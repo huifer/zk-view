@@ -12,6 +12,7 @@ import org.apache.zookeeper.data.Stat;
 import org.huifer.zkview.conf.ZkConfig;
 import org.huifer.zkview.model.NodeInfo;
 import org.huifer.zkview.model.req.CreateNodeReq;
+import org.huifer.zkview.model.req.UpdateNodeReq;
 import org.huifer.zkview.service.INodeService;
 import org.springframework.stereotype.Service;
 
@@ -137,7 +138,7 @@ public class INodeServiceImpl implements INodeService {
 
   private boolean checkPath(String p) {
     String[] split = p.split("/");
-    return split.length > 1;
+    return split.length > 2;
   }
 
   private boolean createEphemeral(CuratorFramework build,
@@ -146,10 +147,15 @@ public class INodeServiceImpl implements INodeService {
       if (checkPath(createNodeReq.getPath())) {
         throw new IllegalArgumentException("临时节点不允许有子节点");
       }
-      build.create().withMode(CreateMode.EPHEMERAL)
-          .forPath(createNodeReq.getPath(), createNodeReq.getData().getBytes());
+      if (!exists(build, createNodeReq.getPath())) {
 
-      return true;
+        build.create().withMode(CreateMode.EPHEMERAL)
+            .forPath(createNodeReq.getPath(), createNodeReq.getData().getBytes());
+
+        return true;
+      } else {
+        return false;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -160,10 +166,15 @@ public class INodeServiceImpl implements INodeService {
       CreateNodeReq createNodeReq) {
     try {
       if (!exists(build, createNodeReq.getPath())) {
-        build.create().withMode(CreateMode.PERSISTENT)
-            .forPath(createNodeReq.getPath(), createNodeReq.getData().getBytes() );
+        build.create().creatingParentsIfNeeded()
+            .withMode(CreateMode.PERSISTENT)
+            .forPath(createNodeReq.getPath(), createNodeReq.getData().getBytes());
+        return true;
+      } else {
+
+        return false;
+
       }
-      return true;
     } catch (Exception e) {
       e.printStackTrace();
 
@@ -179,5 +190,48 @@ public class INodeServiceImpl implements INodeService {
       return false;
     }
 
+  }
+
+  @Override
+  public boolean update(UpdateNodeReq updateNodeReq) {
+    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
+        .sessionTimeoutMs(30000)
+        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
+
+    build.start();
+
+    // 是否存在
+    if (exists(build, updateNodeReq.getPath())) {
+
+      try {
+        build.setData().forPath(updateNodeReq.getPath(), updateNodeReq.getData().getBytes());
+        return true;
+      } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+      }
+    } else {
+      throw new IllegalArgumentException("当前节点地址不存在,path=[ " + updateNodeReq.getPath() + " ]");
+    }
+  }
+
+  @Override
+  public boolean del(String path) {
+    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
+        .sessionTimeoutMs(30000)
+        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
+
+    build.start();
+    if (exists(build, path)) {
+
+      try {
+        build.delete().forPath(path);
+        return true;
+      } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+      }
+    }
+    return false;
   }
 }

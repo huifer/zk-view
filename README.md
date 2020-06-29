@@ -19,8 +19,6 @@ meet with zk-view at http://localhost:9010
 ## Features
 - view node list 
 - view node data
-
-## TODO
 - create / edit / delete a node 
 
 

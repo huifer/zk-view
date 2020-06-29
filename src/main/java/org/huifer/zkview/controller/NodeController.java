@@ -2,6 +2,7 @@ package org.huifer.zkview.controller;
 
 import org.huifer.zkview.model.ResultVO;
 import org.huifer.zkview.model.req.CreateNodeReq;
+import org.huifer.zkview.model.req.UpdateNodeReq;
 import org.huifer.zkview.service.INodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,21 @@ public class NodeController {
   public ResultVO createNode(
       @RequestBody @Validated CreateNodeReq createNodeReq
   ) {
-
     return new ResultVO("ok", nodeService.create(createNodeReq), 200);
+  }
+
+  @PostMapping("/update")
+  public ResultVO updateNode(
+      @RequestBody @Validated UpdateNodeReq updateNodeReq
+  ) {
+    return new ResultVO("ok", nodeService.update(updateNodeReq), 200);
+  }
+
+  @GetMapping("/del")
+  public ResultVO del(
+      @RequestParam(value = "path") String path
+  ){
+    return new ResultVO("ok", nodeService.del(path), 200);
+
   }
 }

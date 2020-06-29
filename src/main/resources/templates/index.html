@@ -2,13 +2,14 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+      name="viewport">
+  <meta content="ie=edge" http-equiv="X-UA-Compatible">
   <title>zk-view</title>
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   <!-- 引入样式 -->
-  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <link href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" rel="stylesheet">
   <!-- 引入组件库 -->
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -16,7 +17,12 @@
 <body>
 <div id="app">
   <el-col :span="12">
-    <el-tree width="200px" :data="og" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+    <el-tree :data="og"
+             :props="defaultProps"
+             @node-click="handleNodeClick"
+             default-expand-all="true"
+             width="200px"
+    ></el-tree>
   </el-col>
 
   <div>
@@ -27,17 +33,54 @@
       <h3>数据</h3>
 
       <el-input
-          type="textarea"
           :rows="2"
           placeholder=""
+          type="textarea"
           v-model="node_info.data">
       </el-input>
 
       <span>节点类型: {{node_type}}</span>
 
+      <br/>
+      <br/>
+      <br/>
+      <el-button @click="del_node" type="danger">删除节点</el-button>
+      <el-button @click="up_node" type="primary">修改</el-button>
     </el-col>
 
+    <br>
+    <div>
 
+      <el-button @click="dialogVisible = true" type="primary">创建节点</el-button>
+      <el-dialog
+          :before-close="handleClose"
+          :visible.sync="dialogVisible"
+          title="提示"
+          width="30%">
+        <span>
+         path:<el-input placeholder="请输入节点地址" v-model="create_node_param.path"></el-input>
+        </span>
+        <span>
+
+     data: <el-input placeholder="请输入数据" v-model="create_node_param.data"></el-input>
+</span>
+        <span>
+          type: <el-select placeholder="请选择" v-model="create_node_param.type">
+        <el-option
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+            v-for="item in options">
+        </el-option>
+      </el-select>
+        </span>
+
+        <span class="dialog-footer" slot="footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button @click="create_node" type="primary">确 定</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </div>
 
@@ -48,24 +91,46 @@
   var app = new Vue({
     el: '#app',
     data: {
+      options: [
+        {
+          value: 'PERSISTENT',
+          label: 'PERSISTENT'
+        }, {
+          value: 'EPHEMERAL',
+          label: 'EPHEMERAL'
+        }
+      ],
+      now_node_pat: "",
+      dialogVisible: false,
       radio: '1',
       message: "hello",
       node_type: "",
-
       og: [],
       defaultProps: {
         children: 'child',
         label: 'showName'
       },
       node_info: {},
+      create_node_param: {
+        path: "",
+        type: "",
+        data: ""
+      },
+      update_node_param: {
+        "path": "",
+        "data": ""
+      }
     },
     methods: {
       handleNodeClick: function (data) {
-        console.log("当前选中的节点是", data.path)
-        axios.get("/node/get/info", {params: {path: data.path}}).then(response => {
+        this.info(data.path);
+      },
+      info: function (path) {
+        axios.get("/node/get/info", {params: {path: path}}).then(response => {
           this.node_info = response.data.data
           this.message = response.data.data.stat;
           this.node_type = response.data.data.type
+          this.now_node_pat = path;
         }).catch(function (error) {
           console.log(error);
         });
@@ -82,6 +147,50 @@
           console.log(error);
         });
 
+      },
+      handleClose: function (done) {
+        this.$confirm('确认关闭？')
+        .then(_ => {
+          done();
+        })
+        .catch(_ => {
+        });
+      },
+      del_node: function () {
+        if (!(this.now_node_pat == '')) {
+          axios.get("node/del", {
+            params: {
+              path: this.now_node_pat
+            }
+          }).then(response => {
+            this.tree();
+          }).catch(function (error) {
+            console.log(error);
+          });
+        }
+      },
+      up_node: function () {
+        if (!(this.now_node_pat == '')) {
+          this.update_node_param.data = this.node_info.data
+          this.update_node_param.path = this.now_node_pat;
+
+          console.log(this.update_node_param);
+          axios.post("/node/update", this.update_node_param).then(response => {
+            this.info(this.now_node_pat);
+          }).catch(function (error) {
+            console.log(error);
+          });
+
+        }
+      },
+      create_node: function () {
+        this.dialogVisible = false;
+        console.log(this.create_node_param);
+        axios.post("/node/create", this.create_node_param).then(response => {
+          this.tree();
+        }).catch(function (err) {
+          console.log(err);
+        });
       }
     },
     created: function () {

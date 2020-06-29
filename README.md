@@ -1,6 +1,8 @@
 # zk-view
 zk-view is a Web UI of [zookeeper](https://zookeeper.apache.org/)
 
+![show](./images/展示.gif)
+
 ## Usage
 To use zk-view , you need clone zk-view git repository.
 

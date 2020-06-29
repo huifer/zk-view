@@ -23,7 +23,7 @@
     <el-col :span="12">
       <h3>状态</h3>
       {{message}}
-      
+
       <h3>数据</h3>
 
       <el-input
@@ -58,19 +58,6 @@
         label: 'showName'
       },
       node_info: {},
-      state: {
-        czxid: 0,
-        mzxid: 0,
-        ctime: 0,
-        mtime: 0,
-        version: 0,
-        cversion: 0,
-        aversion: 0,
-        ephemeralOwner: 0,
-        dataLength: 0,
-        numChildren: 0,
-        pzxid: 0
-      }
     },
     methods: {
       handleNodeClick: function (data) {
@@ -79,23 +66,6 @@
           this.node_info = response.data.data
           this.message = response.data.data.stat;
           this.node_type = response.data.data.type
-          this.state.czxid = response.data.data.czxid;
-          this.state.mzxid = response.data.data.mzxid;
-          this.state.ctime = response.data.data.ctime;
-          this.state.mtime = response.data.data.mtime;
-          this.state.version = response.data.data.version;
-          this.state.cversion = response.data.data.cversion;
-          this.state.aversion = response.data.data.aversion;
-          this.state.ephemeralOwner = response.data.data.ephemeralOwner;
-          this.state.dataLength = response.data.data.dataLength;
-          this.state.numChildren = response.data.data.numChildren;
-          this.state.pzxid = response.data.data.pzxid;
-          if (this.node_type == "持久化节点") {
-            this.radio = 2
-          } else {
-            this.radio = 1
-          }
-
         }).catch(function (error) {
           console.log(error);
         });

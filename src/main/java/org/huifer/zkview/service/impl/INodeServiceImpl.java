@@ -2,7 +2,6 @@ package org.huifer.zkview.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.curator.framework.CuratorFramework;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class INodeServiceImpl implements INodeService {
 
 
-  private static List<Hc> og(List<String> strings, String path) {
+  private static List<Hc> child(List<String> strings, String path) {
     List<Hc> hc = new ArrayList<>();
 
     for (String string : strings) {
@@ -33,13 +32,13 @@ public class INodeServiceImpl implements INodeService {
     return hc;
   }
 
-  public static void hch(CuratorFramework curatorFramework, String path, Hc c) throws Exception {
+  public static void calcTree(CuratorFramework curatorFramework, String path, Hc c) throws Exception {
     List<String> strings = curatorFramework.getChildren().forPath(path);
     c.setPath(path);
-    c.setChild(og(strings, path));
+    c.setChild(child(strings, path));
 
     for (Hc hc : c.getChild()) {
-      hch(curatorFramework, hc.getPath(), hc);
+      calcTree(curatorFramework, hc.getPath(), hc);
     }
 
   }
@@ -89,7 +88,7 @@ public class INodeServiceImpl implements INodeService {
         .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
     build.start();
     Hc hc = new Hc(null, "/", null);
-    hch(build, "/", hc);
+    calcTree(build, "/", hc);
     build.close();
     return hc;
   }

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>zk-view</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+  <el-col :span="12">
+    <el-tree width="200px" :data="og" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+  </el-col>
+
+  <el-radio disabled v-model="radio" label="1">持久化节点</el-radio>
+  <el-radio disabled v-model="radio" label="2">临时节点</el-radio>
+  <div>
+    <el-col :span="12">
+      <h3>状态</h3>
+      <span>czxid:  {{node_info.state.czxid}}</span><br/>
+      <span>mzxid:  {{node_info.state.mzxid}}</span><br/>
+      <span>ctime:  {{node_info.state.ctime}}</span><br/>
+      <span>mtime:  {{node_info.state.mtime}}</span><br/>
+      <span>version:  {{node_info.state.version}}</span><br/>
+      <span>cversion:  {{node_info.state.cversion}}</span><br/>
+      <span>aversion: {{node_info.state.aversion}} </span><br/>
+      <span>ephemeralOwner:  {{node_info.state.ephemeralOwner}}</span><br/>
+      <span>dataLength:  {{node_info.state.dataLength}}</span><br/>
+      <span>numChildren:  {{node_info.state.numChildren}}</span><br/>
+      <span>pzxid:  {{node_info.state.pzxid}}</span><br/>
+      <h3>数据</h3>
+
+      <el-input
+          type="textarea"
+          :rows="2"
+          placeholder="请输入内容"
+          v-model="node_info.data">
+      </el-input>
+    </el-col>
+
+
+
+  </div>
+</div>
+
+</body>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      radio: '1',
+      message: "hello",
+      og: [{
+        path: '一级 1',
+        child: [{
+          path: '二级 1-1',
+          child: [{
+            path: '三级 1-1-1'
+          }]
+        }]
+      }, {
+        path: '一级 2',
+        child: [{
+          path: '二级 2-1',
+          child: [{
+            path: '三级 2-1-1'
+          }]
+        }, {
+          path: '二级 2-2',
+          child: [{
+            path: '三级 2-2-1'
+          }]
+        }]
+      }, {
+        path: '一级 3',
+        child: [{
+          path: '二级 3-1',
+          child: [{
+            path: '三级 3-1-1'
+          }]
+        }, {
+          path: '二级 3-2',
+          child: [{
+            path: '三级 3-2-1'
+          }]
+        }]
+      }],
+      defaultProps: {
+        children: 'child',
+        label: 'path'
+      },
+      node_info: {
+        state: {
+          czxid: 123,
+          mzxid: 123,
+          ctime: 123,
+          mtime: 123,
+          version: 123,
+          cversion: 123,
+          aversion: 123,
+          ephemeralOwner: 123,
+          dataLength: 123,
+          numChildren: 123,
+          pzxid: 123
+        },
+        data: "数据",
+        type: "临时节点"
+      }
+    },
+    methods: {
+      handleNodeClick: function () {
+      }
+    }
+  })
+</script>
+</html>

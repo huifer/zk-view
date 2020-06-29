@@ -29,4 +29,9 @@ public class NodeController {
   ) throws Exception {
     return ResponseEntity.ok(nodeService.info(path));
   }
+
+  @GetMapping("/tree")
+  public ResponseEntity tree() throws Exception {
+    return nodeService.tree();
+  }
 }

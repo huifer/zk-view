@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
   <!-- 引入组件库 -->
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -44,7 +45,7 @@
       </el-input>
     </el-col>
 
-
+    <el-button type="primary" @click="tree" >加载中</el-button>
 
   </div>
 </div>
@@ -52,6 +53,7 @@
 </body>
 
 <script>
+
   var app = new Vue({
     el: '#app',
     data: {
@@ -116,6 +118,16 @@
     },
     methods: {
       handleNodeClick: function () {
+      },
+      tree: function () {
+        axios.get('/node/tree').then(function (response) {
+          console.log(response.data);
+          this.og = [response.data];
+        }).catch(function (error) {
+          console.log(error)
+
+        });
+
       }
     }
   })

@@ -1,11 +1,31 @@
-# zk view
-## 简介
+# zk-view
+zk-view is a Web UI of [zookeeper](https://zookeeper.apache.org/)
 
-- 本项目为 zookeeper 的可视化项目. 主要实现节点信息查看功能
+## Usage
+To use zk-view , you need clone zk-view git repository.
+
+```shell script
+git clone https://github.com/huifer/zk-view.git 
+cd zk-view
+mvn clean install
+java -jar target/zk-view-0.0.1-SNAPSHOT.jar
+
+```
+
+meet with zk-view at http://localhost:9010
 
 
-## 使用图
+
+## Features
+- view node list 
+- view node data
+
+## TODO
+- create / edit / delete a node 
 
 
+## Contributers
+- [@huifer](https://github.com/huifer)
 
-![image-20200629131533791](images/image-20200629131533791.png)
+## License
+- Apache License 2.0

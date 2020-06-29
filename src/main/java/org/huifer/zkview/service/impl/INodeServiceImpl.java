@@ -2,6 +2,7 @@ package org.huifer.zkview.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.curator.framework.CuratorFramework;
@@ -11,40 +12,26 @@ import org.apache.zookeeper.data.Stat;
 import org.huifer.zkview.conf.ZkConfig;
 import org.huifer.zkview.model.NodeInfo;
 import org.huifer.zkview.service.INodeService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public class INodeServiceImpl implements INodeService {
 
 
-  @Override
-  public List<String> nodeList(String path) throws Exception {
-    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
-        .sessionTimeoutMs(30000)
-        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
+  private static List<Hc> og(List<String> strings, String path) {
+    List<Hc> hc = new ArrayList<>();
 
-    build.start();
-    return build.getChildren().forPath(path);
+    for (String string : strings) {
+      if (path.equals("/")) {
+        hc.add(new Hc(path + string, string, null));
+      } else {
+
+        Hc hc1 = new Hc(path + "/" + string, string, null);
+        hc.add(hc1);
+      }
+    }
+    return hc;
   }
-
-  @Override
-  public Object info(String path) throws Exception {
-    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
-        .sessionTimeoutMs(30000)
-        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
-    build.start();
-    // 数据
-    Stat stat = new Stat();
-    byte[] bytes = build.getData().storingStatIn(stat).forPath(path);
-    String data = new String(bytes);
-    return new NodeInfo(stat, data, nodeType(stat));
-  }
-
-  private String nodeType(Stat stat) {
-    return stat.getEphemeralOwner() > 0 ? "临时节点" : "持久化节点";
-  }
-
 
   public static void hch(CuratorFramework curatorFramework, String path, Hc c) throws Exception {
     List<String> strings = curatorFramework.getChildren().forPath(path);
@@ -57,31 +44,54 @@ public class INodeServiceImpl implements INodeService {
 
   }
 
-  private static List<Hc> og(List<String> strings, String path) {
-    List<Hc> hc = new ArrayList<>();
+  @Override
+  public List<String> nodeList(String path) throws Exception {
+    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
+        .sessionTimeoutMs(30000)
+        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
 
-    for (String string : strings) {
-      if (path.equals("/")) {
-        hc.add(new Hc(path + string, null));
-      } else {
+    build.start();
+    List<String> strings = build.getChildren().forPath(path);
+    build.close();
+    return strings;
+  }
 
-        Hc hc1 = new Hc(path + "/" + string, null);
-        hc.add(hc1);
-      }
-    }
-    return hc;
+  private String nodeType(Stat stat) {
+    return stat.getEphemeralOwner() > 0 ? "临时节点" : "持久化节点";
   }
 
   @Override
-  public ResponseEntity tree() throws Exception {
+  public Object info(String path) throws Exception {
+    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
+        .sessionTimeoutMs(30000)
+        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
+    build.start();
+    // 数据
+    Stat stat = new Stat();
+    byte[] bytes = build.getData().storingStatIn(stat).forPath(path);
+
+    String data;
+    if (bytes != null && bytes.length > 0) {
+
+      data = new String(bytes);
+    } else {
+      data = "";
+    }
+    build.close();
+    return new NodeInfo(stat, data, nodeType(stat));
+  }
+
+  @Override
+  public Hc tree() throws Exception {
 
     CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
         .sessionTimeoutMs(30000)
         .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
-build.start();
-    Hc hc = new Hc(null, null);
+    build.start();
+    Hc hc = new Hc(null, "/", null);
     hch(build, "/", hc);
-    return ResponseEntity.ok(hc);
+    build.close();
+    return hc;
   }
 
   @Data
@@ -89,6 +99,7 @@ build.start();
   public static class Hc {
 
     private String path;
+    private String showName;
     private List<Hc> child;
 
   }

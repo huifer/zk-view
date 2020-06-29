@@ -19,33 +19,24 @@
     <el-tree width="200px" :data="og" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
   </el-col>
 
-  <el-radio disabled v-model="radio" label="1">持久化节点</el-radio>
-  <el-radio disabled v-model="radio" label="2">临时节点</el-radio>
   <div>
     <el-col :span="12">
       <h3>状态</h3>
-      <span>czxid:  {{node_info.state.czxid}}</span><br/>
-      <span>mzxid:  {{node_info.state.mzxid}}</span><br/>
-      <span>ctime:  {{node_info.state.ctime}}</span><br/>
-      <span>mtime:  {{node_info.state.mtime}}</span><br/>
-      <span>version:  {{node_info.state.version}}</span><br/>
-      <span>cversion:  {{node_info.state.cversion}}</span><br/>
-      <span>aversion: {{node_info.state.aversion}} </span><br/>
-      <span>ephemeralOwner:  {{node_info.state.ephemeralOwner}}</span><br/>
-      <span>dataLength:  {{node_info.state.dataLength}}</span><br/>
-      <span>numChildren:  {{node_info.state.numChildren}}</span><br/>
-      <span>pzxid:  {{node_info.state.pzxid}}</span><br/>
+      {{message}}
+      
       <h3>数据</h3>
 
       <el-input
           type="textarea"
           :rows="2"
-          placeholder="请输入内容"
+          placeholder=""
           v-model="node_info.data">
       </el-input>
+
+      <span>节点类型: {{node_type}}</span>
+
     </el-col>
 
-    <el-button type="primary" @click="tree" >加载中</el-button>
 
   </div>
 </div>
@@ -59,77 +50,93 @@
     data: {
       radio: '1',
       message: "hello",
-      og: [{
-        path: '一级 1',
-        child: [{
-          path: '二级 1-1',
-          child: [{
-            path: '三级 1-1-1'
-          }]
-        }]
-      }, {
-        path: '一级 2',
-        child: [{
-          path: '二级 2-1',
-          child: [{
-            path: '三级 2-1-1'
-          }]
-        }, {
-          path: '二级 2-2',
-          child: [{
-            path: '三级 2-2-1'
-          }]
-        }]
-      }, {
-        path: '一级 3',
-        child: [{
-          path: '二级 3-1',
-          child: [{
-            path: '三级 3-1-1'
-          }]
-        }, {
-          path: '二级 3-2',
-          child: [{
-            path: '三级 3-2-1'
-          }]
-        }]
-      }],
+      node_type: "",
+
+      og: [],
       defaultProps: {
         children: 'child',
-        label: 'path'
+        label: 'showName'
       },
-      node_info: {
+      node_info: {},
+      state: {
+        czxid: 0,
+        mzxid: 0,
+        ctime: 0,
+        mtime: 0,
+        version: 0,
+        cversion: 0,
+        aversion: 0,
+        ephemeralOwner: 0,
+        dataLength: 0,
+        numChildren: 0,
+        pzxid: 0
+      }
+    },
+    methods: {
+      handleNodeClick: function (data) {
+        console.log("当前选中的节点是", data.path)
+        axios.get("/node/get/info", {params: {path: data.path}}).then(response => {
+          this.node_info = response.data.data
+          this.message = response.data.data.stat;
+          this.node_type = response.data.data.type
+          this.state.czxid = response.data.data.czxid;
+          this.state.mzxid = response.data.data.mzxid;
+          this.state.ctime = response.data.data.ctime;
+          this.state.mtime = response.data.data.mtime;
+          this.state.version = response.data.data.version;
+          this.state.cversion = response.data.data.cversion;
+          this.state.aversion = response.data.data.aversion;
+          this.state.ephemeralOwner = response.data.data.ephemeralOwner;
+          this.state.dataLength = response.data.data.dataLength;
+          this.state.numChildren = response.data.data.numChildren;
+          this.state.pzxid = response.data.data.pzxid;
+          if (this.node_type == "持久化节点") {
+            this.radio = 2
+          } else {
+            this.radio = 1
+          }
+
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+      },
+      tree: function () {
+        axios.get('/node/tree').then(response => {
+          console.log("ogog");
+          console.log(this.og);
+          this.og = [response.data.data];
+          console.log(this.og);
+
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+      }
+    },
+    created: function () {
+      this.tree();
+      this.node_info = {
         state: {
-          czxid: 123,
-          mzxid: 123,
-          ctime: 123,
-          mtime: 123,
-          version: 123,
-          cversion: 123,
-          aversion: 123,
-          ephemeralOwner: 123,
-          dataLength: 123,
-          numChildren: 123,
-          pzxid: 123
+          czxid: 2,
+          mzxid: 0,
+          ctime: 0,
+          mtime: 0,
+          version: 0,
+          cversion: 0,
+          aversion: 0,
+          ephemeralOwner: 0,
+          dataLength: 0,
+          numChildren: 0,
+          pzxid: 0
         },
         data: "数据",
         type: "临时节点"
       }
-    },
-    methods: {
-      handleNodeClick: function () {
-      },
-      tree: function () {
-        axios.get('/node/tree').then(function (response) {
-          console.log(response.data);
-          this.og = [response.data];
-        }).catch(function (error) {
-          console.log(error)
 
-        });
-
-      }
     }
   })
+
+
 </script>
 </html>

@@ -1,7 +1,7 @@
 package org.huifer.zkview.service;
 
 import java.util.List;
-import org.springframework.http.ResponseEntity;
+import org.huifer.zkview.service.impl.INodeServiceImpl.Hc;
 
 public interface INodeService {
 
@@ -10,6 +10,6 @@ public interface INodeService {
 
   Object info(String path) throws Exception;
 
-  ResponseEntity tree() throws Exception;
+  Hc tree() throws Exception;
 
 }

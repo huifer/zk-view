@@ -1,5 +1,6 @@
 package org.huifer.zkview.controller;
 
+import org.huifer.zkview.model.ResultVO;
 import org.huifer.zkview.service.INodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +18,22 @@ public class NodeController {
   private INodeService nodeService;
 
   @GetMapping("/get/child")
-  public ResponseEntity child(
+  public ResultVO child(
       @RequestParam(value = "path") String path
   ) throws Exception {
-    return ResponseEntity.ok(nodeService.nodeList(path));
+    return new ResultVO("ok", nodeService.nodeList(path), 200);
   }
 
   @GetMapping("/get/info")
-  public ResponseEntity info(
+  public ResultVO info(
       @RequestParam(value = "path") String path
   ) throws Exception {
-    return ResponseEntity.ok(nodeService.info(path));
+    return new ResultVO("ok", nodeService.info(path), 200);
+
   }
 
   @GetMapping("/tree")
-  public ResponseEntity tree() throws Exception {
-    return nodeService.tree();
+  public ResultVO tree() throws Exception {
+    return new ResultVO("ok", nodeService.tree(), 200);
   }
 }

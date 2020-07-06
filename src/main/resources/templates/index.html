@@ -16,55 +16,67 @@
 </head>
 <body>
 <div id="app">
-  <el-col :span="12">
-    <el-tree :data="og"
-             :props="defaultProps"
-             @node-click="handleNodeClick"
-             default-expand-all="true"
-             width="200px"
-    ></el-tree>
-  </el-col>
 
   <div>
-    <el-col :span="12">
-      <h3>状态</h3>
-      {{message}}
 
-      <h3>数据</h3>
+    <el-container>
+      <el-header>
+        <span>JVM总内存: {{pro_info.totalMem}}</span>
+        <span>最大内存: {{pro_info.maxMem}}</span>
+        <span>剩余内存: {{pro_info.freeMem}}</span>
+        <span>已运行: {{pro_info.runTime}}</span>
 
-      <el-input
-          :rows="2"
-          placeholder=""
-          type="textarea"
-          v-model="node_info.data">
-      </el-input>
 
-      <span>节点类型: {{node_type}}</span>
+      </el-header>
+      <el-container>
+        <el-aside width="200px">
+          <el-col :span="12">
+            <el-tree :data="og"
+                     :props="defaultProps"
+                     @node-click="handleNodeClick"
+                     default-expand-all="true"
+                     width="200px"
+            ></el-tree>
+          </el-col>
+        </el-aside>
+        <el-container>
+          <el-main>
+            <el-col :span="12">
+              <h3>状态</h3>
+              {{message}}
 
-      <br/>
-      <br/>
-      <br/>
-      <el-button @click="del_node" type="danger">删除节点</el-button>
-      <el-button @click="up_node" type="primary">修改</el-button>
-    </el-col>
+              <h3>数据</h3>
 
-    <br>
-    <div>
+              <el-input
+                  :rows="2"
+                  placeholder=""
+                  type="textarea"
+                  v-model="node_info.data">
+              </el-input>
 
-      <el-button @click="dialogVisible = true" type="primary">创建节点</el-button>
-      <el-dialog
-          :before-close="handleClose"
-          :visible.sync="dialogVisible"
-          title="提示"
-          width="30%">
+              <span>节点类型: {{node_type}}</span>
+
+              <br/>
+              <br/>
+              <br/>
+              <el-button @click="del_node" type="danger">删除节点</el-button>
+              <el-button @click="up_node" type="primary">修改</el-button>
+              <div class="craete_node">
+
+                <el-button @click="dialogVisible = true" type="primary">创建节点</el-button>
+                <el-dialog
+                    :before-close="handleClose"
+                    :visible.sync="dialogVisible"
+                    title="提示"
+                    width="30%">
         <span>
          path:<el-input placeholder="请输入节点地址" v-model="create_node_param.path"></el-input>
         </span>
-        <span>
+                  <span>
 
      data: <el-input placeholder="请输入数据" v-model="create_node_param.data"></el-input>
 </span>
-        <span>
+                  <span>
           type: <el-select placeholder="请选择" v-model="create_node_param.type">
         <el-option
             :key="item.value"
@@ -75,12 +87,27 @@
       </el-select>
         </span>
 
-        <span class="dialog-footer" slot="footer">
+                  <span class="dialog-footer" slot="footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
           <el-button @click="create_node" type="primary">确 定</el-button>
         </span>
-      </el-dialog>
-    </div>
+                </el-dialog>
+              </div>
+            </el-col>
+
+
+
+          </el-main>
+
+
+          <el-footer>
+            <h3>底部</h3>
+          </el-footer>
+        </el-container>
+      </el-container>
+    </el-container>
+
+
   </div>
 </div>
 
@@ -91,6 +118,12 @@
   var app = new Vue({
     el: '#app',
     data: {
+      pro_info: {
+        "totalMem": "",
+        "maxMem": "",
+        "freeMem": "",
+        "runTime": ""
+      },
       options: [
         {
           value: 'PERSISTENT',
@@ -191,10 +224,16 @@
         }).catch(function (err) {
           console.log(err);
         });
+      },
+      jvm: function () {
+        axios.get("conf/jvm").then(response => {
+          this.pro_info = response.data.data;
+        })
       }
     },
     created: function () {
       this.tree();
+      this.jvm();
       this.node_info = {
         state: {
           czxid: 2,

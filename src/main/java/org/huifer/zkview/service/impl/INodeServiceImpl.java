@@ -8,6 +8,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.huifer.zkview.conf.ZkConfig;
 import org.huifer.zkview.model.NodeInfo;
@@ -35,7 +36,8 @@ public class INodeServiceImpl implements INodeService {
     return hc;
   }
 
-  public static void calcTree(CuratorFramework curatorFramework, String path, Hc c) throws Exception {
+  public static void calcTree(CuratorFramework curatorFramework, String path, Hc c)
+      throws Exception {
     List<String> strings = curatorFramework.getChildren().forPath(path);
     c.setPath(path);
     c.setChild(child(strings, path));
@@ -46,8 +48,47 @@ public class INodeServiceImpl implements INodeService {
 
   }
 
+  public static void main(String[] args) throws Exception {
+    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
+        .sessionTimeoutMs(30000)
+        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
+
+    build.start();
+
+    Stat stat = build.checkExists().forPath("/acd");
+    System.out.println();
+  }
+
   @Override
   public List<String> nodeList(String path) throws Exception {
+    List<String> list = new ArrayList<>();
+    ls("/", list);
+    return list;
+  }
+
+  private void ls(String path, List<String> sc) throws Exception {
+    System.out.println(path);
+    sc.add(path);
+    ZooKeeper zk = new ZooKeeper("localhost:2181", 5000, null);
+    List<String> list = zk.getChildren(path, null);
+    //判断是否有子节点
+    if (list.isEmpty() || list == null) {
+      return;
+    } else {
+
+      for (String s : list) {
+        //判断是否为根目录
+        if (path.equals("/")) {
+          ls(path + s, sc);
+        } else {
+          ls(path + "/" + s, sc);
+        }
+      }
+    }
+  }
+
+  @Override
+  public List<String> childList(String path) throws Exception {
     CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
         .sessionTimeoutMs(30000)
         .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
@@ -94,27 +135,6 @@ public class INodeServiceImpl implements INodeService {
     calcTree(build, "/", hc);
     build.close();
     return hc;
-  }
-
-  @Data
-  @AllArgsConstructor
-  public static class Hc {
-
-    private String path;
-    private String showName;
-    private List<Hc> child;
-
-  }
-
-  public static void main(String[] args) throws Exception {
-    CuratorFramework build = CuratorFrameworkFactory.builder().connectString(ZkConfig.getIP_PORT())
-        .sessionTimeoutMs(30000)
-        .retryPolicy(new ExponentialBackoffRetry(1000, 10)).build();
-
-    build.start();
-
-    Stat stat = build.checkExists().forPath("/acd");
-    System.out.println();
   }
 
   @Override
@@ -233,5 +253,15 @@ public class INodeServiceImpl implements INodeService {
       }
     }
     return false;
+  }
+
+  @Data
+  @AllArgsConstructor
+  public static class Hc {
+
+    private String path;
+    private String showName;
+    private List<Hc> child;
+
   }
 }

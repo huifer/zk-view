@@ -7,8 +7,9 @@ import org.huifer.zkview.service.impl.INodeServiceImpl.Hc;
 
 public interface INodeService {
 
-  List<String> nodeList(String path) throws Exception;
+  List<String> childList(String path) throws Exception;
 
+  List<String> nodeList(String path) throws Exception;
 
   Object info(String path) throws Exception;
 

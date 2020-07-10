@@ -1,44 +1,45 @@
 package org.huifer.zkview.zkclient;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import org.apache.zookeeper.client.FourLetterWordMain;
-import org.apache.zookeeper.common.X509Exception.SSLContextException;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooKeeper;
 
 public class ZkClientTest {
-// 4lw.commands.whitelist=*
-  public static void main(String[] args) throws IOException, SSLContextException {
-    String host = "127.0.0.1";
-    int port = 2181;
-//    String srvr = FourLetterWordMain.send4LetterWord(host, port, "srvr");
-//    String stat = FourLetterWordMain.send4LetterWord(host, port, "stat");
-    String mntr = FourLetterWordMain.send4LetterWord(host, port, "mntr");
-//    String ruok = FourLetterWordMain.send4LetterWord(host, port, "ruok");
-    //
 
+  private static final int CLIENT_PORT = 2181;
+  private static final String ROOT_PATH = "/root";
+  private static final String CHILD_PATH = "/root/childPath";
+  private static final String CHILD_PATH_2 = "/root/childPath2";
+  static ZooKeeper zk = null;
 
-    String envi = FourLetterWordMain.send4LetterWord(host, port, "envi");
-    Scanner scanner = new Scanner(envi);
-    Map<String, String> map = new HashMap<>();
-
-    while (scanner.hasNext()) {
-      String line = scanner.nextLine();
-
-      String[] split = line.split("=");
-      if (split.length == 2) {
-        map.put(split[0], split[1]);
+  public static void main(String[] args) throws Exception {
+    try {
+      zk = new ZooKeeper("localhost:" + CLIENT_PORT, 3000, (watchedEvent) -> {
+        System.out.println(
+            watchedEvent.getPath() + "触发了" + watchedEvent.getType() + "事件!" + "data:" + watchedEvent
+                .getPath());
       }
+      );
+
+      // 创建根目录
+
+      Thread.sleep(1000000L);
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    System.out.println( );
-
   }
 
-  private static String split(String line) {
-    return line.substring(line.indexOf(":") + 1)
-        .replaceAll(" ", "").trim();
+  public static String getData(String path) {
+    if (path == null) {
+      return null;
+    }
+    try {
+      return new String(zk.getData(path, false, null));
+    } catch (KeeperException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
-
 }

@@ -18,20 +18,21 @@ public class ZkClientTest {
     String mntr = FourLetterWordMain.send4LetterWord(host, port, "mntr");
 //    String ruok = FourLetterWordMain.send4LetterWord(host, port, "ruok");
     //
-    Scanner scanner = new Scanner(mntr);
 
+
+    String envi = FourLetterWordMain.send4LetterWord(host, port, "envi");
+    Scanner scanner = new Scanner(envi);
     Map<String, String> map = new HashMap<>();
 
     while (scanner.hasNext()) {
       String line = scanner.nextLine();
 
-      String[] split = line.split("\t");
+      String[] split = line.split("=");
       if (split.length == 2) {
         map.put(split[0], split[1]);
       }
     }
-    System.out.println();
-
+    System.out.println( );
 
   }
 

@@ -13,4 +13,7 @@ public interface IZookeeperStateService {
 
   ZookeeperState srvr(String host, int port) throws IOException, SSLContextException;
 
+  Map<String, String> conf(String host, int port) throws IOException, SSLContextException;
+
+  Map<String, String> envi(String host, int port) throws IOException, SSLContextException;
 }

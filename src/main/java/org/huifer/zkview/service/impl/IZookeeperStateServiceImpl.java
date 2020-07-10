@@ -31,10 +31,42 @@ public class IZookeeperStateServiceImpl implements IZookeeperStateService {
     return map;
   }
 
+  @Override
+  public Map<String, String> conf(String host, int port) throws IOException, SSLContextException {
+    String conf = FourLetterWordMain.send4LetterWord(host, port, "conf");
+    Scanner scanner = new Scanner(conf);
+    Map<String, String> map = new HashMap<>();
+
+    while (scanner.hasNext()) {
+      String line = scanner.nextLine();
+
+      String[] split = line.split("\t");
+      if (split.length == 2) {
+        map.put(split[0], split[1]);
+      }
+    }
+    return map;
+  }
+
+  @Override
+  public Map<String, String> envi(String host, int port) throws IOException, SSLContextException {
+    String envi = FourLetterWordMain.send4LetterWord(host, port, "envi");
+    Scanner scanner = new Scanner(envi);
+    Map<String, String> map = new HashMap<>();
+
+    while (scanner.hasNext()) {
+      String line = scanner.nextLine();
+
+      String[] split = line.split("=");
+      if (split.length == 2) {
+        map.put(split[0], split[1]);
+      }
+    }
+    return map;
+  }
 
   private boolean ok(String host, int port) throws IOException, SSLContextException {
     String ruok = FourLetterWordMain.send4LetterWord(host, port, "ruok");
-
     return "imok".equals(ruok);
   }
 

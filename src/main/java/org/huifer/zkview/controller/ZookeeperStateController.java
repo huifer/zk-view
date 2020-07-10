@@ -40,7 +40,23 @@ public class ZookeeperStateController {
     return new ResultVO("ok", clusterInfo(hosts), 200);
   }
 
+  @PostMapping("conf")
+  public ResultVO conf(
+      @RequestBody IpPortReq req
+  ) throws IOException, SSLContextException {
+    return new ResultVO("ok", zookeeperStateService.conf(req.getIp(), req.getPort()), 200);
+  }
 
+  @PostMapping("envi")
+  public ResultVO envi(
+      @RequestBody IpPortReq req
+  ) throws IOException, SSLContextException {
+    return new ResultVO("ok", zookeeperStateService.envi(req.getIp(), req.getPort()), 200);
+  }
+
+  /**
+   * 集群信息
+   */
   private TableEntity clusterInfo(List<String> hosts)
       throws IOException, SSLContextException {
     List<Map<String, String>> query = new ArrayList<>();

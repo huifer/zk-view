@@ -22,6 +22,7 @@ meet with zk-view at http://localhost:9010
 - view node list 
 - view node data
 - create / edit / delete a node 
+- zookeeper state
 
 
 ## Contributers

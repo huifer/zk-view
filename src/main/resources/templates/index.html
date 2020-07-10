@@ -102,13 +102,19 @@
           <el-footer>
             <h3>zookeeper state </h3>
             <span>{{zk_state_res}}</span>
-
           </el-footer>
         </el-container>
       </el-container>
     </el-container>
 
 
+    <el-table :data="data_list">
+      <el-table-column :label="date" v-for="(date, key) in header">
+        <template scope="scope">
+          {{data_list[scope.$index][key]}}
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </div>
 
@@ -154,19 +160,12 @@
         "path": "",
         "data": ""
       },
-      zk_state_res: {
-        "minLatency": "",
-        "avgLatency": "",
-        "maxLatency": "",
-        "received": "",
-        "sent": "",
-        "outStanding": "",
-        "zxid": "",
-        "mode": "",
-        "nodeCount": "",
-        "totalWatches": "",
-        "clientNumber": ""
-      }
+      zk_state_res: "",
+      header: ["column1", "column2", "column3"],
+      data_list: [
+        [1, 2, 3],
+        [4, 5, 6]
+      ],
     },
     methods: {
       handleNodeClick: function (data) {
@@ -185,11 +184,7 @@
       },
       tree: function () {
         axios.get('/node/tree').then(response => {
-          console.log("ogog");
-          console.log(this.og);
           this.og = [response.data.data];
-          console.log(this.og);
-
         }).catch(function (error) {
           console.log(error);
         });
@@ -221,7 +216,6 @@
           this.update_node_param.data = this.node_info.data
           this.update_node_param.path = this.now_node_pat;
 
-          console.log(this.update_node_param);
           axios.post("/node/update", this.update_node_param).then(response => {
             this.info(this.now_node_pat);
           }).catch(function (error) {
@@ -232,7 +226,6 @@
       },
       create_node: function () {
         this.dialogVisible = false;
-        console.log(this.create_node_param);
         axios.post("/node/create", this.create_node_param).then(response => {
           this.tree();
         }).catch(function (err) {
@@ -246,17 +239,26 @@
       },
       zookeeper_state: function () {
         axios.post("/state/zk", {
-          "port": "2181",
+          "port": 2181,
           "ip": "localhost"
         }).then(response => {
-          this.zk_state_res = response.data.data;
+          this.zk_state_res = JSON.stringify(response.data.data) ;
         });
+      },
+      zk_mntr: function () {
+        axios.post("/state/mntr").then(res => {
+          var data = res.data.data;
+          this.header = data.head;
+          this.data_list = data.body;
+        });
+
       }
     },
     created: function () {
       this.tree();
       this.jvm();
       this.zookeeper_state();
+      this.zk_mntr();
       this.node_info = {
         state: {
           czxid: 2,

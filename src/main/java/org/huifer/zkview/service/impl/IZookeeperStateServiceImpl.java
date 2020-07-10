@@ -2,6 +2,8 @@ package org.huifer.zkview.service.impl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import org.apache.zookeeper.client.FourLetterWordMain;
 import org.apache.zookeeper.common.X509Exception.SSLContextException;
@@ -11,8 +13,33 @@ import org.springframework.util.StringUtils;
 
 public class IZookeeperStateServiceImpl implements IZookeeperStateService {
 
+
   @Override
-  public ZookeeperState state(String host, int port) throws IOException, SSLContextException {
+  public Map<String, String> mntr(String host, int port) throws IOException, SSLContextException {
+    String mntr = FourLetterWordMain.send4LetterWord(host, port, "mntr");
+    Scanner scanner = new Scanner(mntr);
+    Map<String, String> map = new HashMap<>();
+
+    while (scanner.hasNext()) {
+      String line = scanner.nextLine();
+
+      String[] split = line.split("\t");
+      if (split.length == 2) {
+        map.put(split[0], split[1]);
+      }
+    }
+    return map;
+  }
+
+
+  private boolean ok(String host, int port) throws IOException, SSLContextException {
+    String ruok = FourLetterWordMain.send4LetterWord(host, port, "ruok");
+
+    return "imok".equals(ruok);
+  }
+
+  @Override
+  public ZookeeperState srvr(String host, int port) throws IOException, SSLContextException {
     String stateText = FourLetterWordMain.send4LetterWord(host, port, "srvr");
     int minLatency = -1;
     BigDecimal avgLatency = new BigDecimal("-1");
